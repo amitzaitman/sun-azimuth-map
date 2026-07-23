@@ -35,7 +35,7 @@
     input[type="range"] { width: 100%; height: 6px; -webkit-appearance: none; appearance: none; border-radius: 3px; background: #e0e0e0; outline: none; }
     input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #1565c0; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
     #azSlider::-webkit-slider-thumb { background: #ff6f00; }
-    #altSlider::-webkit-slider-thumb { background: #2e7d32; }
+    #pathSlider::-webkit-slider-thumb { background: #2e7d32; }
     .occlusion-box { position: absolute; bottom: 210px; left: 12px; right: 12px; z-index: 1000; padding: 10px 14px; border-radius: 12px; font-size: 13px; display: none; box-shadow: 0 3px 14px rgba(0,0,0,0.15); }
     .occlusion-box.visible { display: block; }
     .occlusion-box.blocked { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
@@ -73,8 +73,8 @@
       <input type="range" id="azSlider" min="0" max="360" step="0.5" />
     </div>
     <div class="slider-row">
-      <div class="slider-header"><span>גובה השמש</span><span class="value alt" id="altLabel">—</span></div>
-      <input type="range" id="altSlider" min="-20" max="90" step="0.2" />
+      <div class="slider-header"><span>מסלול השמש (מזרח ← מערב)</span><span class="value alt" id="altLabel">—</span></div>
+      <input type="range" id="pathSlider" min="0" max="1000" step="1" />
     </div>
   </div>
   <script>
@@ -146,22 +146,41 @@
       }
       return best;
     }
-    function findTimeForAltitude(targetAlt) {
+    function getDayPathBounds() {
       const d = document.getElementById('dateInput').value;
-      if (!d) return 12 * 60;
+      if (!d) return { sunrise: 360, noon: 720, sunset: 1080 };
       const base = new Date(d + 'T00:00:00');
-      const currentMins = parseInt(document.getElementById('timeSlider').value, 10) || 720;
-      let best = currentMins, bestDiff = 999;
-      for (let m = 0; m < 1440; m += 2) {
-        const dt = new Date(base);
-        dt.setHours(Math.floor(m / 60), m % 60, 0, 0);
-        const pos = SunCalc.getPosition(dt, currentLat, currentLon);
-        const alt = toDeg(pos.altitude);
-        const diff = Math.abs(alt - targetAlt);
-        const timePenalty = Math.abs(m - currentMins) / 1440 * 0.5;
-        if (diff + timePenalty < bestDiff) { bestDiff = diff + timePenalty; best = m; }
+      const times = SunCalc.getTimes(base, currentLat, currentLon);
+      const toMins = (dt) => {
+        if (!dt || isNaN(dt.getTime())) return null;
+        return dt.getHours() * 60 + dt.getMinutes();
+      };
+      let sunrise = toMins(times.sunrise) ?? 360;
+      let sunset  = toMins(times.sunset)  ?? 1080;
+      let noon    = toMins(times.solarNoon) ?? 720;
+      return { sunrise, noon, sunset };
+    }
+    function pathToMinutes(pathVal) {
+      const { sunrise, noon, sunset } = getDayPathBounds();
+      if (pathVal <= 500) {
+        const t = pathVal / 500;
+        return Math.round(sunrise + t * (noon - sunrise));
+      } else {
+        const t = (pathVal - 500) / 500;
+        return Math.round(noon + t * (sunset - noon));
       }
-      return best;
+    }
+    function minutesToPath(mins) {
+      const { sunrise, noon, sunset } = getDayPathBounds();
+      if (mins <= noon) {
+        if (noon === sunrise) return 500;
+        const t = (mins - sunrise) / (noon - sunrise);
+        return Math.round(Math.max(0, Math.min(500, t * 500)));
+      } else {
+        if (sunset === noon) return 500;
+        const t = (mins - noon) / (sunset - noon);
+        return Math.round(Math.max(500, Math.min(1000, 500 + t * 500)));
+      }
     }
     function updateSun(syncSliders = true) {
       if (updating) return;
@@ -180,7 +199,7 @@
       document.getElementById('timeLabel').textContent = minutesToTimeStr(mins);
       if (syncSliders) {
         document.getElementById('azSlider').value = azimuthDeg.toFixed(1);
-        document.getElementById('altSlider').value = Math.max(-20, Math.min(90, altitudeDeg)).toFixed(1);
+        document.getElementById('pathSlider').value = minutesToPath(mins);
       }
       const statusEl = document.getElementById('sunStatus');
       if (altitudeDeg > 0) { statusEl.textContent = 'מעל האופק'; statusEl.className = 'status up'; }
@@ -286,19 +305,19 @@
       document.getElementById('timeSlider').value = mins;
       document.getElementById('timeLabel').textContent = minutesToTimeStr(mins);
       updateSun(false);
-      document.getElementById('altSlider').value = Math.max(-20, Math.min(90, lastSunAltitude)).toFixed(1);
+      document.getElementById('pathSlider').value = minutesToPath(mins);
       document.getElementById('altLabel').textContent = lastSunAltitude.toFixed(1) + '°';
     });
-    document.getElementById('altSlider').addEventListener('input', function () {
+    document.getElementById('pathSlider').addEventListener('input', function () {
       if (updating) return;
-      const target = parseFloat(this.value);
-      document.getElementById('altLabel').textContent = target.toFixed(1) + '°';
-      const mins = findTimeForAltitude(target);
+      const pathVal = parseInt(this.value, 10);
+      const mins = pathToMinutes(pathVal);
       document.getElementById('timeSlider').value = mins;
       document.getElementById('timeLabel').textContent = minutesToTimeStr(mins);
       updateSun(false);
       document.getElementById('azSlider').value = lastSunAzimuth.toFixed(1);
       document.getElementById('azLabel').textContent = lastSunAzimuth.toFixed(1) + '°';
+      document.getElementById('altLabel').textContent = lastSunAltitude.toFixed(1) + '°';
     });
     initMap();
   </script>
