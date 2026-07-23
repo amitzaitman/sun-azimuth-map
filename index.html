@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="מפה טופוגרפית עם זווית השמש בזמן אמת או לפי בחירה – מיקום מהמכשיר או ידני" />
-  <title>זווית השמש על מפה טופוגרפית</title>
+  <meta name="description" content="מפה טופוגרפית עם זווית השמש והסתרה על ידי הרים – מיקום מהמכשיר או ידני" />
+  <title>זווית השמש + הסתרה על ידי הרים</title>
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -25,150 +25,160 @@
       top: 12px;
       right: 12px;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
       border-radius: 14px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-      padding: 16px 18px;
-      width: min(340px, calc(100vw - 24px));
+      padding: 14px 16px;
+      width: min(360px, calc(100vw - 24px));
       max-height: calc(100vh - 24px);
       overflow-y: auto;
       font-size: 14px;
-      line-height: 1.45;
+      line-height: 1.4;
       color: #1a1a1a;
     }
 
     .panel h1 {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: #0d47a1;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
-    .panel h1 span.icon { font-size: 22px; }
+    .panel h1 span.icon { font-size: 20px; }
 
     .row {
       display: flex;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
 
     label {
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
       color: #333;
-      min-width: 70px;
+      min-width: 68px;
     }
 
     input[type="date"],
     input[type="time"],
     input[type="number"] {
       flex: 1;
-      padding: 7px 10px;
+      padding: 6px 9px;
       border: 1px solid #c5c5c5;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       background: #fff;
       min-width: 0;
     }
-
-    input[type="number"] { max-width: 110px; }
+    input[type="number"] { max-width: 105px; }
 
     button {
       cursor: pointer;
       border: none;
       border-radius: 8px;
-      padding: 8px 14px;
+      padding: 7px 12px;
       font-size: 13px;
       font-weight: 600;
       transition: background 0.15s, transform 0.1s;
     }
     button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .btn-primary {
-      background: #1565c0;
-      color: white;
-      flex: 1;
-    }
-    .btn-primary:hover { background: #0d47a1; }
+    .btn-primary { background: #1565c0; color: white; flex: 1; }
+    .btn-primary:hover:not(:disabled) { background: #0d47a1; }
 
-    .btn-secondary {
-      background: #e3f2fd;
-      color: #0d47a1;
-    }
-    .btn-secondary:hover { background: #bbdefb; }
-
-    .btn-now {
-      background: #ff9800;
-      color: white;
-    }
+    .btn-now { background: #ff9800; color: white; }
     .btn-now:hover { background: #f57c00; }
+
+    .btn-check {
+      background: #2e7d32;
+      color: white;
+      width: 100%;
+      margin-top: 4px;
+      padding: 9px;
+    }
+    .btn-check:hover:not(:disabled) { background: #1b5e20; }
 
     .info-box {
       background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
       border: 1px solid #ffe0b2;
       border-radius: 10px;
-      padding: 12px 14px;
-      margin-top: 8px;
-      margin-bottom: 6px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      margin-bottom: 4px;
     }
-
     .info-box .big {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       color: #e65100;
-      margin: 4px 0;
+      margin: 2px 0;
     }
-
-    .info-box .sub {
-      font-size: 13px;
-      color: #5d4037;
-    }
+    .info-box .sub { font-size: 12px; color: #5d4037; }
 
     .sun-status {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 2px 9px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      margin-top: 6px;
+      margin-top: 4px;
     }
     .sun-up { background: #fff59d; color: #f57f17; }
     .sun-down { background: #cfd8dc; color: #455a64; }
 
+    .occlusion-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      display: none;
+    }
+    .occlusion-box.visible { display: block; }
+    .occlusion-box.blocked {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+      color: #b71c1c;
+    }
+    .occlusion-box.clear {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      color: #1b5e20;
+    }
+    .occlusion-box.loading {
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      color: #0d47a1;
+    }
+    .occlusion-box.error {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      color: #e65100;
+    }
+    .occlusion-box .title { font-weight: 700; margin-bottom: 4px; }
+    .occlusion-box .detail { font-size: 12px; opacity: 0.9; }
+
     .times-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px 12px;
-      font-size: 12px;
-      margin-top: 10px;
+      gap: 4px 10px;
+      font-size: 11px;
+      margin-top: 8px;
       color: #555;
     }
     .times-grid strong { color: #333; }
 
     .hint {
-      font-size: 12px;
+      font-size: 11px;
       color: #666;
-      margin-top: 10px;
-      line-height: 1.4;
+      margin-top: 8px;
+      line-height: 1.35;
     }
 
-    .coords {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 12px;
-      background: #f5f5f5;
-      padding: 6px 8px;
-      border-radius: 6px;
-      direction: ltr;
-      text-align: left;
-    }
-
-    /* Make Leaflet attribution less intrusive */
     .leaflet-control-attribution {
       font-size: 10px !important;
       background: rgba(255,255,255,0.8) !important;
@@ -182,7 +192,7 @@
         left: 0;
         width: 100%;
         border-radius: 16px 16px 0 0;
-        max-height: 48vh;
+        max-height: 52vh;
       }
     }
   </style>
@@ -191,7 +201,7 @@
   <div id="map"></div>
 
   <div class="panel" id="panel">
-    <h1><span class="icon">☀️</span> זווית השמש</h1>
+    <h1><span class="icon">☀️</span> זווית השמש + הרים</h1>
 
     <div class="row">
       <button class="btn-primary" id="btnLocate" type="button">📍 השתמש במיקום שלי</button>
@@ -215,6 +225,10 @@
       <label>קו אורך</label>
       <input type="number" id="lonInput" step="0.0001" />
     </div>
+    <div class="row">
+      <label>גובה עין (מ׳)</label>
+      <input type="number" id="eyeHeight" value="2" min="0" max="50" step="0.5" style="max-width:80px" />
+    </div>
 
     <div class="info-box" id="sunInfo">
       <div class="sub">גובה השמש מעל האופק</div>
@@ -224,14 +238,16 @@
       <div id="sunStatus" class="sun-status"></div>
     </div>
 
-    <div class="times-grid" id="timesGrid">
-      <!-- filled by JS -->
-    </div>
+    <button class="btn-check" id="btnOcclusion" type="button">🏔️ בדוק הסתרה על ידי הרים</button>
+
+    <div id="occlusionResult" class="occlusion-box"></div>
+
+    <div class="times-grid" id="timesGrid"></div>
 
     <p class="hint">
-      • לחץ על המפה כדי לשנות מיקום<br>
-      • הקו הכתום מציג את כיוון השמש (אזימוט)<br>
-      • הקו האפור מציג את כיוון הצל
+      • לחץ על המפה או גרור את הסמן לשינוי מיקום<br>
+      • הקו הכתום = כיוון השמש • האפור = כיוון הצל<br>
+      • בדיקת הסתרה משתמשת בנתוני גובה SRTM (כ־30 מ׳)
     </p>
   </div>
 
@@ -239,37 +255,40 @@
     // ========== Config ==========
     const DEFAULT_LAT = 31.9640;   // ראשון לציון
     const DEFAULT_LON = 34.8040;
-    const LINE_KM = 4.5;          // אורך קו הכיוון
+    const LINE_KM = 4.5;
+    const MAX_RAY_KM = 35;         // מרחק מקסימלי לבדיקת הסתרה
+    const SAMPLE_STEP_M = 180;     // מרחק בין דגימות
+    const EARTH_RADIUS = 6371000;  // מטרים
 
     // ========== State ==========
-    let map, marker, sunLine, shadowLine;
+    let map, marker, sunLine, shadowLine, blockingMarker;
     let currentLat = DEFAULT_LAT;
     let currentLon = DEFAULT_LON;
+    let lastSunAltitude = 0;
+    let lastSunAzimuth = 0;
+    let isChecking = false;
 
     // ========== Helpers ==========
     function toRad(d) { return d * Math.PI / 180; }
     function toDeg(r) { return r * 180 / Math.PI; }
 
-    // Destination point (approx spherical)
     function destinationPoint(lat, lon, bearingDeg, distKm) {
       const R = 6371;
       const brng = toRad(bearingDeg);
       const φ1 = toRad(lat);
       const λ1 = toRad(lon);
       const δ = distKm / R;
-
       const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(brng));
       const λ2 = λ1 + Math.atan2(
         Math.sin(brng) * Math.sin(δ) * Math.cos(φ1),
         Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2)
       );
-      return [toDeg(φ2), ((toDeg(λ2) + 540) % 360) - 180]; // normalize lon
+      return [toDeg(φ2), ((toDeg(λ2) + 540) % 360) - 180];
     }
 
     function bearingToCardinal(az) {
       const dirs = ['צפון', 'צפון־מזרח', 'מזרח', 'דרום־מזרח', 'דרום', 'דרום־מערב', 'מערב', 'צפון־מערב'];
-      const idx = Math.round(az / 45) % 8;
-      return dirs[idx];
+      return dirs[Math.round(az / 45) % 8];
     }
 
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -281,17 +300,13 @@
 
     // ========== Map init ==========
     function initMap() {
-      map = L.map('map', {
-        zoomControl: true,
-        attributionControl: true
-      }).setView([DEFAULT_LAT, DEFAULT_LON], 14);
+      map = L.map('map', { zoomControl: true }).setView([DEFAULT_LAT, DEFAULT_LON], 14);
 
       L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
         attribution: 'Kartendaten: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Kartendarstellung: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
       }).addTo(map);
 
-      // Marker
       marker = L.marker([DEFAULT_LAT, DEFAULT_LON], {
         draggable: true,
         title: 'מיקום נבחר'
@@ -306,7 +321,6 @@
         setLocation(e.latlng.lat, e.latlng.lng, true);
       });
 
-      // Initial
       setNow();
       setLocation(DEFAULT_LAT, DEFAULT_LON, false);
       updateSun();
@@ -314,14 +328,16 @@
 
     // ========== Location ==========
     function setLocation(lat, lon, moveMarker) {
-      currentLat = +lat.toFixed(5);
-      currentLon = +lon.toFixed(5);
+      currentLat = +(+lat).toFixed(5);
+      currentLon = +(+lon).toFixed(5);
       document.getElementById('latInput').value = currentLat;
       document.getElementById('lonInput').value = currentLon;
-
-      if (moveMarker !== false) {
-        marker.setLatLng([currentLat, currentLon]);
-      }
+      if (moveMarker !== false) marker.setLatLng([currentLat, currentLon]);
+      // clear previous occlusion result when location changes
+      const box = document.getElementById('occlusionResult');
+      box.className = 'occlusion-box';
+      box.innerHTML = '';
+      if (blockingMarker) { map.removeLayer(blockingMarker); blockingMarker = null; }
       updateSun();
     }
 
@@ -330,7 +346,6 @@
       const d = document.getElementById('dateInput').value;
       const t = document.getElementById('timeInput').value;
       if (!d || !t) return new Date();
-      // Local time construction
       const [hh, mm] = t.split(':').map(Number);
       const date = new Date(d + 'T00:00:00');
       date.setHours(hh, mm, 0, 0);
@@ -339,32 +354,29 @@
 
     function setNow() {
       const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = pad(now.getMonth() + 1);
-      const dd = pad(now.getDate());
-      document.getElementById('dateInput').value = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('dateInput').value =
+        now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
       document.getElementById('timeInput').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
       updateSun();
     }
 
-    // ========== Sun calculation & visualization ==========
+    // ========== Sun calculation ==========
     function updateSun() {
       const date = getSelectedDate();
       const pos = SunCalc.getPosition(date, currentLat, currentLon);
 
-      // SunCalc 1.9 returns altitude & azimuth in radians.
-      // Azimuth is measured from south, clockwise.
-      // Convert to degrees from north (standard map / meteorological azimuth).
-      let altitudeDeg = toDeg(pos.altitude);
-      let azimuthDeg  = (toDeg(pos.azimuth) + 180) % 360;
+      // SunCalc 1.9: radians, azimuth from south clockwise → convert to from-north
+      const altitudeDeg = toDeg(pos.altitude);
+      const azimuthDeg  = (toDeg(pos.azimuth) + 180) % 360;
 
-      const altEl = document.getElementById('altDisplay');
-      const azEl  = document.getElementById('azDisplay');
+      lastSunAltitude = altitudeDeg;
+      lastSunAzimuth = azimuthDeg;
+
+      document.getElementById('altDisplay').textContent = altitudeDeg.toFixed(1) + '°';
+      document.getElementById('azDisplay').textContent =
+        azimuthDeg.toFixed(1) + '°  (' + bearingToCardinal(azimuthDeg) + ')';
+
       const statusEl = document.getElementById('sunStatus');
-
-      altEl.textContent = altitudeDeg.toFixed(1) + '°';
-      azEl.textContent  = azimuthDeg.toFixed(1) + '°  (' + bearingToCardinal(azimuthDeg) + ')';
-
       if (altitudeDeg > 0) {
         statusEl.textContent = 'השמש מעל האופק';
         statusEl.className = 'sun-status sun-up';
@@ -373,28 +385,22 @@
         statusEl.className = 'sun-status sun-down';
       }
 
-      // Times of day
       const times = SunCalc.getTimes(date, currentLat, currentLon);
-      const grid = document.getElementById('timesGrid');
-      grid.innerHTML = `
+      document.getElementById('timesGrid').innerHTML = `
         <div>זריחה: <strong>${formatTime(times.sunrise)}</strong></div>
         <div>שקיעה: <strong>${formatTime(times.sunset)}</strong></div>
         <div>צהריים סולאריים: <strong>${formatTime(times.solarNoon)}</strong></div>
         <div>שעת זהב: <strong>${formatTime(times.goldenHour)}</strong></div>
       `;
 
-      // Draw lines
       drawDirectionLines(azimuthDeg, altitudeDeg);
     }
 
     function drawDirectionLines(azimuthDeg, altitudeDeg) {
-      // Remove old
       if (sunLine) map.removeLayer(sunLine);
       if (shadowLine) map.removeLayer(shadowLine);
 
       const start = [currentLat, currentLon];
-
-      // Sun direction
       const sunEnd = destinationPoint(currentLat, currentLon, azimuthDeg, LINE_KM);
       sunLine = L.polyline([start, sunEnd], {
         color: '#ff6f00',
@@ -404,7 +410,6 @@
         lineCap: 'round'
       }).addTo(map);
 
-      // Shadow is opposite
       const shadowAz = (azimuthDeg + 180) % 360;
       const shadowEnd = destinationPoint(currentLat, currentLon, shadowAz, LINE_KM * 0.7);
       shadowLine = L.polyline([start, shadowEnd], {
@@ -413,6 +418,140 @@
         opacity: altitudeDeg > 0 ? 0.55 : 0.2,
         dashArray: '6,8'
       }).addTo(map);
+    }
+
+    // ========== Terrain occlusion (SRTM via OpenTopoData) ==========
+    async function fetchElevations(locations) {
+      // locations = array of [lat, lon]
+      // Use public OpenTopoData + CORS proxy (public API has CORS disabled)
+      const locStr = locations.map(p => p[0].toFixed(5) + ',' + p[1].toFixed(5)).join('|');
+      const target = 'https://api.opentopodata.org/v1/srtm30m?locations=' + encodeURIComponent(locStr);
+
+      // Primary: corsproxy.io
+      const proxies = [
+        'https://corsproxy.io/?' + encodeURIComponent(target),
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(target)
+      ];
+
+      let lastError = null;
+      for (const url of proxies) {
+        try {
+          const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          if (data.status !== 'OK' || !data.results) throw new Error('API status not OK');
+          return data.results.map(r => r.elevation); // can be null
+        } catch (e) {
+          lastError = e;
+          console.warn('Elevation proxy failed:', e.message);
+        }
+      }
+      throw lastError || new Error('כל השרתים נכשלו');
+    }
+
+    async function checkOcclusion() {
+      if (isChecking) return;
+      const box = document.getElementById('occlusionResult');
+      const btn = document.getElementById('btnOcclusion');
+
+      if (lastSunAltitude <= 0) {
+        box.className = 'occlusion-box visible error';
+        box.innerHTML = '<div class="title">השמש מתחת לאופק</div><div class="detail">אין צורך לבדוק הסתרה</div>';
+        return;
+      }
+
+      isChecking = true;
+      btn.disabled = true;
+      btn.textContent = 'בודק...';
+      box.className = 'occlusion-box visible loading';
+      box.innerHTML = '<div class="title">בודק תוואי שטח...</div><div class="detail">מושך נתוני גובה (SRTM 30מ׳)</div>';
+
+      if (blockingMarker) { map.removeLayer(blockingMarker); blockingMarker = null; }
+
+      try {
+        const eyeH = parseFloat(document.getElementById('eyeHeight').value) || 2;
+
+        // Build sample points along the sun ray
+        const points = [[currentLat, currentLon]]; // observer first
+        const numSamples = Math.min(55, Math.floor((MAX_RAY_KM * 1000) / SAMPLE_STEP_M));
+        for (let i = 1; i <= numSamples; i++) {
+          const distKm = (i * SAMPLE_STEP_M) / 1000;
+          points.push(destinationPoint(currentLat, currentLon, lastSunAzimuth, distKm));
+        }
+
+        const elevations = await fetchElevations(points);
+        const obsElev = elevations[0];
+        if (obsElev == null) throw new Error('לא התקבל גובה לנקודת התצפית');
+
+        let maxAngle = -90;
+        let blockingIdx = -1;
+        let blockingElev = null;
+        let blockingDist = null;
+
+        for (let i = 1; i < elevations.length; i++) {
+          const elev = elevations[i];
+          if (elev == null) continue;
+
+          const distM = i * SAMPLE_STEP_M;
+          const deltaH = elev - obsElev - eyeH;
+          // Earth curvature correction (approximate)
+          const curvature = (distM * distM) / (2 * EARTH_RADIUS);
+          const angleRad = Math.atan((deltaH - curvature) / distM);
+          const angleDeg = toDeg(angleRad);
+
+          if (angleDeg > maxAngle) {
+            maxAngle = angleDeg;
+            if (angleDeg > lastSunAltitude) {
+              blockingIdx = i;
+              blockingElev = elev;
+              blockingDist = distM;
+            }
+          }
+        }
+
+        // Result
+        if (blockingIdx > 0) {
+          const distKm = (blockingDist / 1000).toFixed(1);
+          const relH = Math.round(blockingElev - obsElev);
+          box.className = 'occlusion-box visible blocked';
+          box.innerHTML = `
+            <div class="title">🏔️ השמש מוסתרת על ידי תוואי שטח</div>
+            <div class="detail">
+              חסום במרחק ≈ ${distKm} ק״מ<br>
+              גובה יחסי של הרכס ≈ ${relH} מ׳ מעל הנקודה<br>
+              זווית ההסתרה המקסימלית: ${maxAngle.toFixed(1)}° (השמש ב־${lastSunAltitude.toFixed(1)}°)
+            </div>`;
+
+          // Mark the blocking point
+          const blockPt = points[blockingIdx];
+          blockingMarker = L.circleMarker(blockPt, {
+            radius: 8,
+            color: '#c62828',
+            fillColor: '#ef5350',
+            fillOpacity: 0.85,
+            weight: 2
+          }).addTo(map).bindPopup(`נקודת הסתרה משוערת<br>${distKm} ק״מ • גובה יחסי ${relH} מ׳`);
+        } else {
+          box.className = 'occlusion-box visible clear';
+          box.innerHTML = `
+            <div class="title">✅ השמש גלויה</div>
+            <div class="detail">
+              אין הסתרה משמעותית עד ${MAX_RAY_KM} ק״מ בכיוון השמש<br>
+              זווית האופק המקסימלית שנמצאה: ${maxAngle.toFixed(1)}°
+            </div>`;
+        }
+      } catch (err) {
+        console.error(err);
+        box.className = 'occlusion-box visible error';
+        box.innerHTML = `
+          <div class="title">לא הצלחתי לבדוק</div>
+          <div class="detail">${err.message || 'שגיאת רשת / שרת גובה זמנית'}<br>
+          נסה שוב בעוד כמה שניות</div>`;
+      } finally {
+        isChecking = false;
+        btn.disabled = false;
+        btn.textContent = '🏔️ בדוק הסתרה על ידי הרים';
+      }
     }
 
     // ========== Events ==========
@@ -437,26 +576,21 @@
     });
 
     document.getElementById('btnNow').addEventListener('click', setNow);
+    document.getElementById('btnOcclusion').addEventListener('click', checkOcclusion);
 
     document.getElementById('dateInput').addEventListener('change', updateSun);
     document.getElementById('timeInput').addEventListener('change', updateSun);
     document.getElementById('timeInput').addEventListener('input', updateSun);
 
-    document.getElementById('latInput').addEventListener('change', () => {
-      const lat = parseFloat(document.getElementById('latInput').value);
-      const lon = parseFloat(document.getElementById('lonInput').value);
-      if (!isNaN(lat) && !isNaN(lon)) {
-        setLocation(lat, lon, true);
-        map.setView([lat, lon], map.getZoom());
-      }
-    });
-    document.getElementById('lonInput').addEventListener('change', () => {
-      const lat = parseFloat(document.getElementById('latInput').value);
-      const lon = parseFloat(document.getElementById('lonInput').value);
-      if (!isNaN(lat) && !isNaN(lon)) {
-        setLocation(lat, lon, true);
-        map.setView([lat, lon], map.getZoom());
-      }
+    ['latInput', 'lonInput'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        const lat = parseFloat(document.getElementById('latInput').value);
+        const lon = parseFloat(document.getElementById('lonInput').value);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          setLocation(lat, lon, true);
+          map.setView([lat, lon], map.getZoom());
+        }
+      });
     });
 
     // ========== Start ==========
